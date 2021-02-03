@@ -6,40 +6,22 @@ on:
 
 jobs:
 
-  build:
+  build_deploy:
     name: Build
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Repo
-        uses: actions/checkout@master
-        
-      - name: Install npm packages
-        run: |
-           cd functions
-           npm install
-      - name: Archive Production Artifact
-        uses: actions/upload-artifact@master
-        with:
-          name: dist
-          path: dist
-  deploy:
-     name:  Deploy to Firebase
-     needs: build
-     runs-on: ubuntu-latest
-   
-     steps:
-      - name: Checkout Repo
-        uses: actions/checkout@master
-        
-      - name: Download Artifact
-        uses: actions/download-artifact@master
-        with:
-          name: dist
-          path: dist
-      
-      - name: Start deploy
-        uses: w9jds/firebase-action@master
-        with:
+    - uses: actions/checkout@v2
+
+    # Runs a single command using the runners shell
+    # And of course we need to goto our functions folder to deploy
+    - name: Install npm packages
+      run: |
+        cd functions
+        npm install
+    # Deploying the functions to firebase
+    - name:  Deploy to Firebase
+      uses: w9jds/firebase-action@master
+      with:
           args: deploy --only functions
-        env:
+      env:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
