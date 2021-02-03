@@ -22,8 +22,8 @@ jobs:
      runs-on: ubuntu-latest
      steps:
        - name: Start deploy
-         working-directory: ./functions
          uses: w9jds/firebase-action@master
+         working-directory: ./functions
          with:
           args: deploy --only functions
          env:
