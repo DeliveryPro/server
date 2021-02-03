@@ -22,9 +22,7 @@ jobs:
      name:  Deploy to Firebase
      needs: build
      runs-on: ubuntu-latest
-     defaults:
-       run:
-         working-directory: ./functions
+   
      steps:
        - name: Start deploy
          uses: w9jds/firebase-action@master
