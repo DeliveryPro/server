@@ -17,6 +17,7 @@ jobs:
         run: |
            cd functions
            npm install
+           cd ../
   deploy:
      name:  Deploy to Firebase
      needs: build
