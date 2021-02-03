@@ -16,10 +16,14 @@ jobs:
         run: |
            cd functions
            npm install
-           
-      - name:  Deploy to Firebase
-        uses: w9jds/firebase-action@master
-        with:
+  deploy:
+     name:  Deploy to Firebase
+     needs: build
+     runs-on: ubuntu-latest
+     steps:
+       - name: Start deploy
+         uses: w9jds/firebase-action@master
+         with:
           args: deploy --only functions
-        env:
+         env:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
