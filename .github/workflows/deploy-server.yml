@@ -22,7 +22,9 @@ jobs:
      runs-on: ubuntu-latest
      steps:
        - name: Go to Functions folder
-         run: cd functions
+         run: |
+          cd functions
+          ll
          
        - name: Start deploy
          uses: w9jds/firebase-action@master
