@@ -23,7 +23,6 @@ jobs:
      steps:
        - name: Go to Functions folder
          run: |
-          cd functions
           ll
          
        - name: Start deploy
