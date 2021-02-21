@@ -70,7 +70,8 @@ const loginFunction = async (request, response) => {
   console.log("queried login");
   return await corsFunc(request, response, async (req, res) => {
     functions.logger.log("Hello world", req);
-    console.log("req => ", JSON.stringify(req));
+    const {...values} = req.params
+    console.log("req => ", values);
     res.send({});
   });
 };
