@@ -70,9 +70,29 @@ const loginFunction = async (request, response) => {
   console.log("queried login");
   return await corsFunc(request, response, async (req, res) => {
     functions.logger.log("login", req);
+    const { id, name } = req.body;
+
     // const { ...values } = req.params;
     console.log("req => ", req.body);
-    res.send({});
+
+    const data = await firebase
+      .database()
+      .ref("users/" + id)
+      .on("value", (sn) => sn.value());
+
+    if (!data) {
+      await firebase
+        .database()
+        .ref("users/" + id)
+        .set({
+          ...req.body,
+        });
+    }
+
+    res.send({
+      uid: id,
+      message: "log in success",
+    });
   });
 };
 
