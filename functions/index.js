@@ -66,4 +66,15 @@ const helloWorld = async (request, response) => {
   });
 };
 
+const loginFunction = async (request, response) => {
+  console.log("queried login");
+  return await corsFunc(request, response, async (req, res) => {
+    functions.logger.log("Hello world", req);
+    console.log("req => ", req);
+    res.send({});
+  });
+};
+
 exports.helloWorld = functions.https.onRequest(helloWorld);
+
+exports.login = functions.https.onRequest(loginFunction);
