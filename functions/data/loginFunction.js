@@ -1,14 +1,17 @@
 const { db } = require("../config");
 const { cors } = require("../utils/cors");
+const { emailToDot } = require("../utils/emailToDot");
 
 const loginFunction = async (request, response) =>
   await cors(request, response, async (req, res) => {
     const {
-      user: { id: googleId, email: googleEmail },
+      user: { id: googleId, email },
       user,
     } = req.body;
 
-    if (!googleId || !googleEmail) {
+    const emailDot = emailToDot(email);
+
+    if (!googleId || !email) {
       res.send({
         message: "invalid data while login with google",
       });
@@ -17,8 +20,8 @@ const loginFunction = async (request, response) =>
     try {
       const snap = await db.ref("users").child(googleId).get();
       if (snap.exists()) {
-        data = snap.val();
         res.send({
+          uid: googleId,
           message: "login success",
         });
         return;
@@ -29,7 +32,9 @@ const loginFunction = async (request, response) =>
 
     try {
       await db.ref("users").child(googleId).set(user);
+      db.ref("emails").child(emailDot).set(googleId);
       res.send({
+        uid: googleId,
         message: "login success",
       });
     } catch (e) {

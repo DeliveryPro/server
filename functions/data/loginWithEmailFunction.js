@@ -1,12 +1,15 @@
 const { db } = require("../config");
 const { cors } = require("../utils/cors");
+const { emailToDot } = require("../utils/emailToDot");
 
 const loginWithEmailFunction = async (request, response) =>
   await cors(request, response, async (req, res) => {
     const { email, password: sendedPassword } = req.body;
     let key = false;
+
+    const emailDot = emailToDot(email);
     try {
-      const snap = await db.ref("users").child(email).get();
+      const snap = await db.ref("emails").child(emailDot).get();
 
       key = snap.val();
     } catch (e) {
@@ -31,6 +34,7 @@ const loginWithEmailFunction = async (request, response) =>
       const { password } = userSnap.val();
       if (sendedPassword === password) {
         res.send({
+          uid: key,
           message: "login success",
         });
         return;
@@ -40,13 +44,12 @@ const loginWithEmailFunction = async (request, response) =>
         message: "password mismatch",
       });
       return;
-
     } catch (e) {
       res.status(500);
       res.send({
         message: "error while finding user",
       });
-      return
+      return;
     }
   });
 
