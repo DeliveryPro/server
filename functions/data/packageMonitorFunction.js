@@ -3,14 +3,14 @@ const { db } = require("../config");
 const { emailToDot } = require("../utils/emailToDot");
 
 const packageMonitorFunction = functions.database
-  .ref("delivery/{userId}/{packageId}")
+  .ref("delivery/{packageId}")
   .onCreate(async (snapshot, context) => {
-    const { receiver_email, sender_uid, areYouReceiver } = snapshot.val();
+    const { receiver_email, sender_uid } = snapshot.val();
 
     const dotEmail = emailToDot(receiver_email);
 
     const date = new Date().toDateString();
-    let userId = null;
+    let receiver_uid = null;
 
     try {
       const receiverEmailSnap = await db.ref("emails").child(dotEmail).get();
@@ -19,7 +19,7 @@ const packageMonitorFunction = functions.database
           .child(snapshot.key)
           .update({ date, error: "receiver not found" });
       }
-      userId = receiverEmailSnap.val();
+      receiver_uid = receiverEmailSnap.val();
     } catch (e) {
       functions.logger.log("error in getting user Id", snapshot.key);
     }
@@ -28,7 +28,7 @@ const packageMonitorFunction = functions.database
     let receiver = null;
 
     try {
-      const receiverSnap = await db.ref("users").child(userId).get();
+      const receiverSnap = await db.ref("users").child(receiver_uid).get();
       if (!receiverSnap.exists()) {
         return snapshot.ref.parent
           .child(snapshot.key)
@@ -39,22 +39,43 @@ const packageMonitorFunction = functions.database
       functions.logger.log("error in getting user", snapshot.key);
     }
 
-    //* create new Package for receiver
+    //* get Sender data
+    let sender = null;
 
     try {
-      if (userId !== sender_uid && !areYouReceiver) {
-        db.ref("delivery")
-          .child(userId)
-          .push({ ...snapshot.val(), areYouReceiver: true });
+      const senderSnap = await db.ref("users").child(sender_uid).get();
+      if (!senderSnap.exists()) {
+        return snapshot.ref.parent
+          .child(snapshot.key)
+          .update({ date, error: "sender not found in users DB" });
       }
+      sender = senderSnap.val();
     } catch (e) {
-      functions.logger.log(
-        "error while creating receiver package",
-        snapshot.key
-      );
+      functions.logger.log("error in getting user", snapshot.key);
     }
 
-    return snapshot.ref.parent.child(snapshot.key).update({ date, receiver });
+    //* write data to sender
+    try {
+      db.ref(`users/${sender_uid}/delivery`)
+        .child(snapshot.key)
+        .set({ ...snapshot.val(), receiver, date });
+    } catch (e) {
+      functions.logger.log("error in writing to receiver", snapshot.key);
+    }
+
+    //* write data to receiver
+
+    try {
+      db.ref(`users/${receiver_uid}/delivery`)
+        .child(snapshot.key)
+        .set({ ...snapshot.val(), date, sender });
+    } catch (e) {
+      functions.logger.log("error in writing to receiver", snapshot.key);
+    }
+
+    return snapshot.ref.parent
+      .child(snapshot.key)
+      .update({ date, receiver, sender, receiver_uid, sender_uid });
   });
 
 exports.packageMonitorFunction = packageMonitorFunction;
