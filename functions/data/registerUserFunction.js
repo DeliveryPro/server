@@ -4,7 +4,7 @@ const { emailToDot } = require("../utils/emailToDot");
 
 const registerUserFunction = (request, response) =>
   cors(request, response, async (req, res) => {
-    const { email, password } = req.body;
+    const { email, password, adminRegisterData } = req.body;
 
     const emailWithDot = emailToDot(email);
 
@@ -21,12 +21,29 @@ const registerUserFunction = (request, response) =>
       console.log("error =>", error);
     }
 
+    let uid = null;
+
     try {
+      const defaultRegistrationObject = {
+        email,
+        password,
+        role: "none",
+      };
+      const adminRegisterUserObject = {
+        email,
+        ...adminRegisterData,
+      };
+
       const { key } = await db
         .ref("users")
-        .push({ email, password, role: "none" });
+        .push(
+          adminRegisterData
+            ? adminRegisterUserObject
+            : defaultRegistrationObject
+        );
 
       await db.ref(`emails/${emailWithDot}`).set(key);
+      uid = key;
     } catch (e) {
       res.status(500);
       res.send({
@@ -36,6 +53,7 @@ const registerUserFunction = (request, response) =>
     }
 
     res.send({
+      uid,
       message: "user created successfully",
     });
   });

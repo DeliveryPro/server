@@ -2,6 +2,7 @@ const generatePassword = require("password-generator");
 
 const { db } = require("../config");
 const { cors } = require("../utils/cors");
+const { sendMessage } = require("../utils/sendMail");
 
 const passwordRestorationFunction = (request, response) =>
   cors(request, response, async (req, res) => {
@@ -25,6 +26,7 @@ const passwordRestorationFunction = (request, response) =>
     } catch (e) {
       res.status(500);
       res.send({
+        error: e,
         message: `error while setting the new password to user ${receiver}`,
       });
     }
