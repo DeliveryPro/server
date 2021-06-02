@@ -7,6 +7,7 @@ const { loginFunction } = require("./data/loginFunction");
 const { registerUserFunction } = require("./data/registerUserFunction");
 const { loginWithEmailFunction } = require("./data/loginWithEmailFunction");
 const { packageMonitorFunction } = require("./data/packageMonitorFunction");
+const { packageStatusUpdateFunction } = require("./data/packageStatusUpdateFunction");
 
 exports.login = functions.https.onRequest(loginFunction);
 exports.loginWithEmail = functions.https.onRequest(loginWithEmailFunction);
@@ -22,3 +23,4 @@ exports.addAnswer = functions.https.onRequest(addAnswerFunction);
 
 //* background Functions
 exports.packageMonitorFunction = packageMonitorFunction
+exports.packageStatusUpdateFunction = packageStatusUpdateFunction
